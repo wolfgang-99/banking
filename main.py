@@ -45,6 +45,9 @@ def create_user():
             logger.info(f"user account ({username}) has been created ")
             return jsonify(f"user account ({username}) has been created and recorded"), 200
 
+        elif create_acc == "Username already exists":
+            return jsonify(f"Username({username}) already exists")
+
         else:
             logger.info(f"error: {create_acc}")
             return jsonify(create_acc), 201
