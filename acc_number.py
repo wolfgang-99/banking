@@ -4,14 +4,12 @@ from datetime import datetime
 
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler("log_files/acc_number.log"), logging.StreamHandler()]
-)
-
-# setting up logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('acc_number')
+file_handler = logging.FileHandler('log_files/acc_number.log')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
 
 # bank code
 bank_code = "203"

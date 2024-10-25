@@ -5,14 +5,12 @@ from dotenv import load_dotenv
 from server import generate_reference_number
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler("log_files/database.log"), logging.StreamHandler()]
-)
-
-# setting up logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('api')
+file_handler = logging.FileHandler('log_files/api.log')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
 
 # load environmental variable
 load_dotenv()

@@ -12,10 +12,11 @@ from server import is_image_file
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler("main.log"), logging.StreamHandler()]
+    handlers=[logging.FileHandler("log_files/main.log"), logging.StreamHandler()]
 )
 
-logger = logging.getLogger(__name__)
+# setting up logging
+logger = logging.getLogger('main.py')
 
 app = Flask(__name__)
 CORS(app)
@@ -38,19 +39,21 @@ def create_user():
 
         logger.info('getting user sign_up data ....')
         if not username or not email or not password or not country:
+            logger.error(f"Error: Missing required fields")
             return jsonify({"error": "Missing required fields"}), 400
 
         create_acc = create_user_account(username=username, email=email, password=password, country=country)
-        if create_acc:
+        if create_acc is True:
             logger.info(f"user account ({username}) has been created ")
             return jsonify(f"user account ({username}) has been created and recorded"), 200
 
         elif create_acc == "Username already exists":
-            return jsonify(f"Username({username}) already exists")
+            logger.info(f"Username ({username}) already exists.")
+            return jsonify({"error": f"Username ({username}) already exists. Please choose a different username"}), 409
 
         else:
-            logger.info(f"error: {create_acc}")
-            return jsonify(create_acc), 201
+            logger.error(f"Error: {create_acc}")
+            return jsonify({"error": create_acc}), 500
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
