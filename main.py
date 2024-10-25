@@ -25,7 +25,7 @@ app.secret_key = os.getenv("secret_key")
 
 @app.route('/', methods=['GET'])
 def home():
-    return jsonify({"message": "Welcome to the NASAA API of art"}), 200
+    return jsonify({"message": "Welcome to the banking API "}), 200
 
 
 @app.route('/sign_up', methods=['POST'])
@@ -288,3 +288,7 @@ def create_sub_acc(username):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+    
+if __name__ == '__main__':
+    app.run(debug=True)
