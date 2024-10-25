@@ -71,12 +71,19 @@ def login_in():
 
         login_in = authenticate_user(username=username, password=password)
 
-        if login_in:
+        if login_in is True:
             logger.info(f"user account ({username}) logged in successful")
             return jsonify(f"user account ({username})  logged in successful"), 200
+
+        elif login_in == "Incorrect Password":
+            return jsonify("Login Failed: Incorrect Password"), 409
+
+        elif login_in == "User not found":
+            return jsonify("Login Failed: User not found")
+
         else:
             logger.info(f"error: {login_in}")
-            return jsonify(login_in), 201
+            return jsonify(f"error: {login_in}"), 201
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

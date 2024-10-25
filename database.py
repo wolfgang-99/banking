@@ -71,10 +71,10 @@ def authenticate_user(username, password):
                 return True
             else:
                 logger.info('Login Failed: Incorrect Password')
-                return "Login Failed: Incorrect Password"
+                return "Incorrect Password"
         else:
             logger.info('Login Failed: User not found')
-            return "Login Failed: User not found"
+            return "User not found"
     except Exception as e:
         logger.info("An error occurred: " + str(e))
         return "An error occurred: " + str(e)
