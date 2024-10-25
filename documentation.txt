@@ -1,0 +1,71 @@
+Here’s the API documentation for the endpoints:
+
+## API Documentation
+
+### Base URL
+- URL: `/`
+- Method: `GET`
+- Description: This is a welcome route for the Banking API.
+- Response:
+  - Status: `200 OK`
+  - Body: `{ "message": "Welcome to the banking API" }`
+
+---
+
+### 1. User Registration
+
+- Endpoint: `/sign_up`
+- Method: `POST`
+- Description: Registers a new user in the banking system.
+
+- Request Parameters:
+  - `username` (string, required): The username of the user.
+  - `email` (string, required): The email address of the user.
+  - `password` (string, required): The password for the account.
+  - `country` (string, required): The country of residence.
+
+- Responses:
+  - Success:
+    - Status: `200 OK`
+    - Body: `"user account (<username>) has been created and recorded"`
+  - Error - Missing Fields:
+    - Status: `400 Bad Request`
+    - Body: `{ "error": "Missing required fields" }`
+  - Error - Creation Failure:
+    - Status: `201 Created`
+    - Body: `"error: <error message>"`
+  - Exception:
+    - Status: `500 Internal Server Error`
+    - Body: `{ "error": "<error message>" }`
+
+---
+
+### 2. User Login
+
+- Endpoint: `/sign_in`
+- Method: `POST`
+- Description: Authenticates a user to allow access to the banking system.
+
+- Request Parameters:
+  - `username` (string, required): The username of the user.
+  - `password` (string, required): The password for the account.
+
+- Responses:
+  - Success:
+    - Status: `200 OK`
+    - Body: `"user account (<username>) logged in successful"`
+  - Error - Missing Fields:
+    - Status: `400 Bad Request`
+    - Body: `{ "error": "Missing required fields" }`
+  - Error - Authentication Failure:
+    - Status: `201 Created`
+    - Body: `"error: <error message>"`
+  - Exception:
+    - Status: `500 Internal Server Error`
+    - Body: `{ "error": "<error message>" }`
+
+---
+
+### Additional Notes
+- Logging: Each endpoint includes logging for tracking purposes, recording successful operations or issues encountered during requests.
+- Error Handling: General error handling is implemented with `try/except` blocks to capture and respond to exceptions in `500 Internal Server Error` responses.
