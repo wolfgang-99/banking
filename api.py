@@ -218,5 +218,4 @@ payload = {
 
     }
 
-acc = create_sub_account(auth_token=auth, data=payload)
-print(acc)
+
