@@ -21,7 +21,7 @@ MONGODB_URL = os.getenv("MONGODB_URL")
 
 # Connect to mongodb
 client = MongoClient(MONGODB_URL)
-db = client['banking']
+db = client['banking_official']
 
 
 def create_user_account(username, email, password, country):
