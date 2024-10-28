@@ -66,6 +66,49 @@ Here’s the API documentation for the endpoints:
 
 ---
 
+### 3. User Profile Creation
+
+- **Endpoint**: `/create profile`
+- **Method**: `POST`
+- **Description**: Creates a profile for a user, including personal details and a profile image.
+
+- **Request Parameters**:
+  - `username` (string, required): The username of the user.
+  - `first_name` (string, required): The user's first name.
+  - `last_name` (string, required): The user's last name.
+  - `sex` (string, required): The user's gender.
+  - `image` (file, required): The user's profile image.
+  - `address` (string, required): The user's residential address.
+  - `state` (string, required): The state or region of residence.
+  - `zip_code` (string, required): The postal code for the user's address.
+  - `city` (string, required): The city of residence.
+  - `country` (string, required): The country of residence.
+
+- **Responses**:
+  - **Success**:
+    - **Status**: `200 OK`
+    - **Body**: `"user <username> profile created"`
+  - **Error - Missing Image**:
+    - **Status**: `400 Bad Request`
+    - **Body**: `{ "error": "Non file part to image" }`
+  - **Error - Missing Fields**:
+    - **Status**: `400 Bad Request`
+    - **Body**: `{ "error": "Missing required fields" }`
+  - **Error - No Image Selected**:
+    - **Status**: `400 Bad Request`
+    - **Body**: `{ "error": "Non selected image file" }`
+  - **Error - Invalid Image Format**:
+    - **Status**: `400 Bad Request`
+    - **Body**: `{ "error": "The uploaded file is not a valid image" }`
+  - **Error - Profile Creation Failure**:
+    - **Status**: `201 Created`
+    - **Body**: `"error: <error message>"`
+  - **Exception**:
+    - **Status**: `500 Internal Server Error`
+    - **Body**: `{ "error": "<error message>" }`
+
+---
+
 ### Additional Notes
 - Logging: Each endpoint includes logging for tracking purposes, recording successful operations or issues encountered during requests.
 - Error Handling: General error handling is implemented with `try/except` blocks to capture and respond to exceptions in `500 Internal Server Error` responses.

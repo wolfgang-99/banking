@@ -1,12 +1,10 @@
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify
 from datetime import timedelta
-from database import *
-from acc_number import generate_bank_account_number
 from api import *
 from database import *
 import logging
 from flask_cors import CORS
-from server import is_image_file
+from server import validate_image
 
 # Configure logging
 logging.basicConfig(
@@ -83,11 +81,10 @@ def login_in():
 
         else:
             logger.info(f"error: {login_in}")
-            return jsonify(f"error: {login_in}"), 201
+            return jsonify(f"error: {login_in}"), 500
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 
 @app.route("/create profile", methods=['POST'])
@@ -114,47 +111,49 @@ def create_user_profile():
     if image.filename == '':
         return jsonify({'error': 'Non selected image file'}), 400
 
-    # Save image temporarily to check its type
-    file_path = f"temp/{image.filename}"
     try:
-        # Save the image to disk
-        with open(file_path, 'wb') as f:
-            f.write(image.read())
+        validate = validate_image(uploaded_image=image, username=username)
 
-        # Validate if the uploaded image is an image
-        if not is_image_file(file_path):
-            os.remove(file_path)
-            return jsonify({'error': 'The uploaded file is not a valid image'}), 400
+        if validate is True:
 
-        # image has been validated; now upload using its path
-        try:
-
+            # image has been validated; now upload using its path
             balance = 0.0  # initialize acc balance
             acc_num = generate_bank_account_number()  # create acc number
 
-            create_profile = create_user_profile(username=username, first_name=first_name, last_name=last_name, sex=sex,
-                                                 image_doc=file_path, address=address, state=state, zip_code=zip_code,
-                                                 city=city, country=country, balance=balance, acc_num=acc_num)
+            create_profile = create_profile_in_db(username=username, first_name=first_name, last_name=last_name,
+                                                  sex=sex,
+                                                  address=address, state=state, zip_code=zip_code,
+                                                  city=city, country=country, balance=balance, acc_num=acc_num)
 
-            if create_profile:
+            if create_profile is True:
                 logger.info(f'user {username} profile created')
                 return jsonify(f'user {username} profile created'), 200
+
+            elif create_profile == "Username already exists":
+                logger.info(f"Username ({username}) already exists.")
+                return jsonify({"error": f"Username ({username}) already exists."})
+
             else:
                 logger.info(create_profile)
                 return jsonify(create_profile), 201
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
 
-        finally:
-            # Ensure the file is removed even if an error occurs
-            if os.path.exists(file_path):
-                os.remove(file_path)
+        elif validate == "invalid file format":
+            return jsonify({'error': 'The uploaded file is not a valid image'}), 400
+
+        else:
+            logger.info(f"error: {validate}")
+            return jsonify(f"error: {validate}"), 500
 
     except Exception as e:
         # Handle any errors, ensuring file cleanup
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        # if os.path.exists('doc_images'):
+        #     os.remove('doc_images')
         return jsonify({'error': str(e)}), 500
+
+    # finally:
+    #     # Ensure the file is removed even if an error occurs
+    #     if os.path.exists('doc_images'):
+    #         os.remove('doc_images')
 
 
 @app.route('/get_profile_data/<username>', methods=['GET'])
@@ -173,67 +172,67 @@ def get_profile(username):
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/submit_kyc', methods=['POST'])
-def create_kyc():
-    if 'image' not in request.files:
-        return jsonify({'error': 'Non file part to image'}), 400
-
-    username = request.form['username']
-    first_name = request.form['first_name']
-    last_name = request.form['last_name']
-    sex = request.form['sex']
-    image = request.files['image']
-    address = request.form['address']
-    state = request.form['state']
-    zip_code = request.form['zip_code']
-    city = request.form['city']
-    country = request.form['country']
-
-    logger.info('getting user kyc data ....')
-    if not all([username, first_name, last_name, sex, address, state, zip_code, city]):
-        return jsonify({"error": "Missing required fields"}), 400
-
-    if image.filename == '':
-        return jsonify({'error': 'Non selected image file'}), 400
-
-    # Save image temporarily to check its type
-    file_path = f"temp/{image.filename}"
-    try:
-
-        # Save the image to disk
-        with open(file_path, 'wb') as f:
-            f.write(image.read())
-
-        # Validate if the uploaded image is an image
-        if not is_image_file(file_path):
-            os.remove(file_path)
-            return jsonify({'error': 'The uploaded file is not a valid image'}), 400
-
-        # image has been validated; now upload using its path
-        try:
-            kyc = create_kyc_data(username=username, first_name=first_name, last_name=last_name, sex=sex,
-                                  image_doc=image, address=address, state=state, zip_code=zip_code, city=city,
-                                  country=country)
-
-            if kyc:
-                logger.info(f'user {username} kyc saved')
-                return jsonify(f'user {username} kyc saved'), 200
-            else:
-                logger.info(kyc)
-                return jsonify(kyc), 201
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-
-        finally:
-            # Ensure the file is removed even if an error occurs
-            if os.path.exists(file_path):
-                os.remove(file_path)
-
-    except Exception as e:
-        # Handle any errors, ensuring file cleanup
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        return jsonify({'error': str(e)}), 500
+# @app.route('/submit_kyc', methods=['POST'])
+# def create_kyc():
+#     if 'image' not in request.files:
+#         return jsonify({'error': 'Non file part to image'}), 400
+#
+#     username = request.form['username']
+#     first_name = request.form['first_name']
+#     last_name = request.form['last_name']
+#     sex = request.form['sex']
+#     image = request.files['image']
+#     address = request.form['address']
+#     state = request.form['state']
+#     zip_code = request.form['zip_code']
+#     city = request.form['city']
+#     country = request.form['country']
+#
+#     logger.info('getting user kyc data ....')
+#     if not all([username, first_name, last_name, sex, address, state, zip_code, city]):
+#         return jsonify({"error": "Missing required fields"}), 400
+#
+#     if image.filename == '':
+#         return jsonify({'error': 'Non selected image file'}), 400
+#
+#     # Save image temporarily to check its type
+#     file_path = f"temp/{image.filename}"
+#     try:
+#
+#         # Save the image to disk
+#         with open(file_path, 'wb') as f:
+#             f.write(image.read())
+#
+#         # Validate if the uploaded image is an image
+#         if not is_image_file(file_path):
+#             os.remove(file_path)
+#             return jsonify({'error': 'The uploaded file is not a valid image'}), 400
+#
+#         # image has been validated; now upload using its path
+#         try:
+#             kyc = create_kyc_data(username=username, first_name=first_name, last_name=last_name, sex=sex,
+#                                   image_doc=image, address=address, state=state, zip_code=zip_code, city=city,
+#                                   country=country)
+#
+#             if kyc:
+#                 logger.info(f'user {username} kyc saved')
+#                 return jsonify(f'user {username} kyc saved'), 200
+#             else:
+#                 logger.info(kyc)
+#                 return jsonify(kyc), 201
+#         except Exception as e:
+#             return jsonify({'error': str(e)}), 500
+#
+#         finally:
+#             # Ensure the file is removed even if an error occurs
+#             if os.path.exists(file_path):
+#                 os.remove(file_path)
+#
+#     except Exception as e:
+#         # Handle any errors, ensuring file cleanup
+#         if os.path.exists(file_path):
+#             os.remove(file_path)
+#         return jsonify({'error': str(e)}), 500
 
 
 @app.route('/get_kyc_data/<username>', methods=['GET'])
@@ -262,13 +261,13 @@ def create_sub_acc(username):
             legal_entity_type = request.form['legal_entity_type']
             street = request.form['street']
             city = request.form['city']
-            country =request.form['country']
-            postal_code =request.form['postal_code']
-            state_or_province =request.form['state_or_province']
-            identification_type =request.form['identification_type']
+            country = request.form['country']
+            postal_code = request.form['postal_code']
+            state_or_province = request.form['state_or_province']
+            identification_type = request.form['identification_type']
             identification_value = request.form['identification_value']
 
-            if not all([account_name, legal_entity_type, street, city, country, postal_code,state_or_province,
+            if not all([account_name, legal_entity_type, street, city, country, postal_code, state_or_province,
                         identification_value, identification_type]):
                 return jsonify({"error": "Missing required fields"}), 400
 

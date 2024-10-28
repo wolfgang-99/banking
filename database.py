@@ -80,23 +80,28 @@ def authenticate_user(username, password):
         return "An error occurred: " + str(e)
 
 
-def create_user_profile(username, first_name, last_name, sex, image_doc, address, state, zip_code, city, country,
+def create_profile_in_db(username, first_name, last_name, sex, address, state, zip_code, city, country,
                         balance, acc_num):
     try:
         logger.info('creating user profile...')
         login_collection = db['login_details']
 
         # Check if the username already exists in the database
-        existing_user = login_collection.find_one({'username': username})
+        login_existing_user = login_collection.find_one({'username': username})
 
-        if existing_user:
+        if login_existing_user:
             # If the username exist create profile
             profile_collection = db['profile_details']
+            existing_user = profile_collection.find_one({'username': username})
+
+            if existing_user:
+                logger.info("Username already exists. Please choose a different username.")
+                return "Username already exists"
+
             submission = {'username': username,
                           'first_name': first_name,
                           'last_name': last_name,
                           'sex': sex,
-                          'image': image_doc,
                           'address': address,
                           'state': state,
                           'zip_code': zip_code,
@@ -234,3 +239,41 @@ def save_account_uuid(username, account_uuid):
     except Exception as e:
         logger.info("An error occurred: " + str(e))
         return "An error occurred: " + str(e)
+
+
+def upload_img_to_mongodb(image_file_path, image_format, username):
+    try:
+        # Create a collection to store images
+        image_collection = db['profile_document']
+
+        # Read the image binary data
+        with open(image_file_path, 'rb') as image_file:
+            image_binary = image_file.read()
+
+        # Get image file information
+        image_filename = os.path.basename(image_file_path)
+        image_size_bytes = os.path.getsize(image_file_path)
+
+        # Convert the size to kilobytes (KB)
+        image_size_kb = image_size_bytes / 1024
+
+        # Convert the size to megabytes (MB)
+        image_size_mb = image_size_kb / 1024
+
+        image_format = image_format  # You can determine the format using libraries like 'python-magic'
+
+        # Store image metadata along with the binary data
+        image_document = {
+            'filename': image_filename,
+            'format': image_format,
+            'size': f'{image_size_mb:.2f} MB',
+            'data': image_binary,
+            'username': username
+        }
+
+        # Insert the image document into MongoDB
+        image_collection.insert_one(image_document)
+        return True
+
+    except Exception as e:
+        return f"error {e}"
