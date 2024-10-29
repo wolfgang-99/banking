@@ -109,6 +109,32 @@ Here’s the API documentation for the endpoints:
 
 ---
 
+### 4. Retrieve User Profile Data
+
+- **Endpoint**: `/get_profile_data/<username>`
+- **Method**: `GET`
+- **Description**: Retrieves the profile data for a specified user.
+
+- **URL Parameter**:
+  - `username` (string, required): The username of the user whose profile data is requested.
+
+- **Responses**:
+  - **Success**:
+    - **Status**: `200 OK`
+    - **Body**: JSON object containing the user’s profile data.
+  - **Error - Profile Not Found**:
+    - **Status**: `404 Not Found`
+    - **Body**: `"user(<username>) profile data not found. user has not created profile"`
+  - **Error - Retrieval Failure**:
+    - **Status**: `400 Bad Request`
+    - **Body**: `"error: <error message>"`
+  - **Exception**:
+    - **Status**: `500 Internal Server Error`
+    - **Body**: `{ "error": "<error message>" }`
+
+---
+
+
 ### Additional Notes
 - Logging: Each endpoint includes logging for tracking purposes, recording successful operations or issues encountered during requests.
 - Error Handling: General error handling is implemented with `try/except` blocks to capture and respond to exceptions in `500 Internal Server Error` responses.

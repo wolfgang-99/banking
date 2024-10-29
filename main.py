@@ -164,12 +164,17 @@ def get_profile(username):
     try:
         profile_data = get_profile_data(username=username)
 
-        if profile_data:
+        if profile_data is True:
             logger.info(f'user {username} profile data retrieved')
             return jsonify(profile_data), 200
+
+        elif profile_data == 'profile not found':
+            logger.info(f'user({username}) profile data not found')
+            return jsonify(f'user({username}) profile data not found. user have not created profile'), 404
+
         else:
             logger.info(profile_data)
-            return jsonify(profile_data), 201
+            return jsonify(profile_data), 400
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

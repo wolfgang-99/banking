@@ -142,10 +142,10 @@ def get_profile_data(username):
             }
 
             logger.info(f"profile data retrieved")
-            return profile_doc
+            return True, profile_doc
         else:
             logger.info(f'user {username} dose not have profile data')
-            return f'user {username} dose not have profile data'
+            return 'profile not found'
 
     except Exception as e:
         logger.info("An error occurred: " + str(e))
