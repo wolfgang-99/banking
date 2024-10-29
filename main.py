@@ -5,6 +5,8 @@ from database import *
 import logging
 from flask_cors import CORS
 from server import validate_image
+import os
+import shutil
 
 # Configure logging
 logging.basicConfig(
@@ -150,10 +152,11 @@ def create_user_profile():
         #     os.remove('doc_images')
         return jsonify({'error': str(e)}), 500
 
-    # finally:
-    #     # Ensure the file is removed even if an error occurs
-    #     if os.path.exists('doc_images'):
-    #         os.remove('doc_images')
+    finally:
+        # Ensure the file is removed even if an error occurs
+        UPLOAD_FOLDER = 'doc_images'
+        if os.path.exists(UPLOAD_FOLDER):
+            shutil.rmtree(UPLOAD_FOLDER)
 
 
 @app.route('/get_profile_data/<username>', methods=['GET'])
