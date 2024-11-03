@@ -90,8 +90,10 @@ def create_profile_in_db(username, first_name, last_name, sex, address, state, z
         login_existing_user = login_collection.find_one({'username': username})
 
         if login_existing_user:
-            # If the username exist create profile
+            # If the username exist in login collection create profile
             profile_collection = db['profile_details']
+
+            # check if username is already in profile collection
             existing_user = profile_collection.find_one({'username': username})
 
             if existing_user:
@@ -152,22 +154,29 @@ def get_profile_data(username):
         return "An error occurred: " + str(e)
 
 
-def create_kyc_data(username, first_name, last_name, sex, image_doc, address, zip_code, city, state, country):
+def create_kyc_data(username, first_name, last_name, sex,  address, zip_code, city, state, country):
     try:
         logger.info('creating user kyc data...')
         login_collection = db['login_details']
 
-        # Check if the username already exists in the database
-        existing_user = login_collection.find_one({'username': username})
+        # Check if the username already exists in login collection
+        login_existing_user = login_collection.find_one({'username': username})
 
-        if existing_user:
-            # If the username exist create profile
+        if login_existing_user:
+            # If the username exist in login collection create kyc
             kyc_collection = db['kyc_details']
+
+            # check if username is already in kyc collection
+            existing_user = kyc_collection.find_one({'username': username})
+
+            if existing_user:
+                logger.info("Username already exists. Please choose a different username.")
+                return "Username already exists"
+
             submission = {'username': username,
                           'first_name': first_name,
                           'last_name': last_name,
                           'sex': sex,
-                          'image_ID': image_doc,
                           'address': address,
                           'state': state,
                           'zip_code': zip_code,
@@ -243,8 +252,9 @@ def save_account_uuid(username, account_uuid):
 
 def upload_img_to_mongodb(image_file_path, image_format, username):
     try:
+        logger.info('uploading image to database')
         # Create a collection to store images
-        image_collection = db['profile_document']
+        image_collection = db['kyc_document']
 
         # Read the image binary data
         with open(image_file_path, 'rb') as image_file:
@@ -264,11 +274,11 @@ def upload_img_to_mongodb(image_file_path, image_format, username):
 
         # Store image metadata along with the binary data
         image_document = {
+            'username': username,
             'filename': image_filename,
             'format': image_format,
             'size': f'{image_size_mb:.2f} MB',
             'data': image_binary,
-            'username': username
         }
 
         # Insert the image document into MongoDB
@@ -276,4 +286,5 @@ def upload_img_to_mongodb(image_file_path, image_format, username):
         return True
 
     except Exception as e:
+        logger.error(f'An error occurred : {e}')
         return f"error {e}"
