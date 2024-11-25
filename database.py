@@ -116,6 +116,9 @@ def create_profile_in_db(username, first_name, last_name, sex, address, state, z
             profile_collection.insert_one(submission)
             logger.info(f"user {username} profile has been created")
             return True
+        else:
+            logger.info('profile creation failed: User not found')
+            return "User not found"
 
     except Exception as e:
         logger.info("An error occurred: " + str(e))
