@@ -184,7 +184,7 @@ def create_sub_account(auth_token, data):
     if response.status_code == 200:
         logger.info("sub_account creation successful!")
         res = response.json()
-        return res
+        return res, True
     else:
         logger.error(f"Failed to create sub_account . Status code: {response.status_code}")
         logger.error("Response: " + response.text)

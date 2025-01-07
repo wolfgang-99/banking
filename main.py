@@ -293,7 +293,7 @@ def create_sub_acc(username):
                 'identification_value': identification_value
             }
             create = create_sub_account(auth_token=auth, data=payload)
-            if create:
+            if create is True:
                 acc_uuid = create['id']
                 save_acc_uuid = save_account_uuid(username, account_uuid=acc_uuid)
                 if save_acc_uuid:
